@@ -1,0 +1,38 @@
+[
+    {
+        "name": "Plastic Water Bottles",
+        "risk": "Medium",
+        "description": "Chemicals like BPA can leach from the plastic into the water, potentially disrupting hormones.",
+        "source": "https://www.ncbi.nlm.nih.gov/pmc/articles/PMC3222987/"
+    },
+    {
+        "name": "Non-stick Pans",
+        "risk": "High",
+        "description": "Teflon coatings can release toxic fumes when overheated, which can cause flu-like symptoms.",
+        "source": "https://www.ewg.org/research/canaries-kitchen"
+    },
+    {
+        "name": "Microwave Popcorn",
+        "risk": "High",
+        "description": "The bags are often lined with chemicals that can break down into PFOA, a likely carcinogen.",
+        "source": "https://www.ecowatch.com/your-popcorn-is-toxic-2639209357.html"
+    },
+    {
+        "name": "Air Fresheners",
+        "risk": "Medium",
+        "description": "Many air fresheners release volatile organic compounds (VOCs) that can cause respiratory problems.",
+        "source": "https://www.epa.gov/indoor-air-quality-iaq/volatile-organic-compounds-impact-indoor-air-quality"
+    },
+    {
+        "name": "Cleaning Products",
+        "risk": "Medium",
+        "description": "Many common household cleaners contain chemicals that can cause skin and respiratory irritation.",
+        "source": "https://www.lung.org/clean-air/at-home/indoor-air-pollutants/cleaning-supplies-household-chem"
+    },
+    {
+        "name": "Canned Food",
+        "risk": "Low",
+        "description": "Some cans are lined with a resin that contains BPA, which can leach into the food.",
+        "source": "https://www.mayoclinic.org/healthy-lifestyle/nutrition-and-healthy-eating/expert-answers/bpa/faq-20058331"
+    }
+]

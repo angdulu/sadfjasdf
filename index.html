@@ -1,14 +1,28 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hello World</title>
-  <link href='/style.css' rel='stylesheet'>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Risk Radar</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <h1>Hello, world!</h1>
-  <button onclick="console.log('hello');">Press me</button>
-  <script defer type="text/javascript" src="/main.js"></script>
+    <header>
+        <h1>Risk Radar</h1>
+        <p>Your guide to navigating the risks in everyday items.</p>
+    </header>
+    <main>
+        <div class="search-container">
+            <input type="text" id="search-bar" placeholder="Search for an item...">
+        </div>
+        <div id="item-grid" class="item-grid"></div>
+    </main>
+    <footer>
+        <p>&copy; 2024 Risk Radar. All rights reserved.</p>
+    </footer>
+    <script src="main.js" type="module"></script>
 </body>
 </html>
