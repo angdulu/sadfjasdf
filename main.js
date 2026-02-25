@@ -161,25 +161,25 @@ class ItemCard extends HTMLElement {
 
         this.shadowRoot.innerHTML = `
             <style>
-                .flip-card { background-color: transparent; width: 100%; height: 520px; border-radius: 15px; perspective: 1000px; }
-                .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.8s; transform-style: preserve-3d; box-shadow: 0 10px 30px rgba(0,0,0,0.15); border-radius: 15px; }
+                .flip-card { background-color: transparent; width: 100%; height: 520px; border-radius: 18px; perspective: 1000px; }
+                .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.65s; transform-style: preserve-3d; box-shadow: 0 12px 28px rgba(15,23,42,0.1); border-radius: 18px; border: 1px solid #eef2f8; }
                 .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
-                .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 15px; overflow: hidden; display: flex; flex-direction: column; }
+                .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; }
                 .flip-card-front { background-color: #ffffff; }
-                .flip-card-back { background-color: #ffffff; transform: rotateY(180deg); padding: 1.2rem 1.5rem; justify-content: flex-start; text-align: left; overflow-y: auto; }
-                .card-image { width: 100%; height: 200px; object-fit: cover; }
-                .card-header { padding: 1rem; color: #fff; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 0.5rem; }
+                .flip-card-back { background-color: #ffffff; transform: rotateY(180deg); padding: 1.15rem 1.25rem; justify-content: flex-start; text-align: left; overflow-y: auto; }
+                .card-image { width: 100%; height: 190px; object-fit: cover; }
+                .card-header { padding: 0.9rem; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.45rem; letter-spacing: -0.01em; }
                 .risk-icon { width: 24px; height: 24px; }
-                .card-content { padding: 1rem; flex-grow: 1; text-align: left; }
-                h3 { margin: 0 0 0.6rem 0; font-size: 1.4rem; }
-                .tag { display: inline-flex; align-items: center; gap: 0.4rem; padding: 0.2rem 0.6rem; border-radius: 999px; background: ${riskMeta.badge}; color: #fff; font-size: 0.85rem; font-weight: 700; }
-                .note { margin: 0.6rem 0 0.8rem 0; font-size: 0.9rem; color: #495057; }
-                .field { margin-bottom: 0.7rem; }
-                .field-label { font-weight: 700; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.04em; color: #495057; }
-                .field-value { margin-top: 0.2rem; font-size: 0.95rem; color: #212529; }
-                .field-source { margin-top: 0.2rem; font-size: 0.78rem; color: #6c757d; }
-                .section-title { margin: 1rem 0 0.5rem 0; font-size: 0.95rem; font-weight: 700; color: #343a40; }
-                .recommendation { font-style: italic; background-color: #f8f9fa; padding: 0.8rem; border-left: 4px solid #007BFF; border-radius: 5px; margin-top: 0.8rem; }
+                .card-content { padding: 1rem 1rem 1.1rem; flex-grow: 1; text-align: left; }
+                h3 { margin: 0 0 0.6rem 0; font-size: 1.3rem; letter-spacing: -0.02em; }
+                .tag { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.7rem; border-radius: 999px; background: ${riskMeta.badge}; color: #fff; font-size: 0.8rem; font-weight: 700; }
+                .note { margin: 0.55rem 0 0.7rem 0; font-size: 0.9rem; color: #5a6478; }
+                .field { margin-bottom: 0.65rem; }
+                .field-label { font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.035em; color: #4e586b; }
+                .field-value { margin-top: 0.2rem; font-size: 0.93rem; color: #1d2433; }
+                .field-source { margin-top: 0.2rem; font-size: 0.76rem; color: #8993a6; }
+                .section-title { margin: 0.95rem 0 0.45rem 0; font-size: 0.92rem; font-weight: 700; color: #343d4d; }
+                .recommendation { font-style: italic; background-color: #f4f8ff; padding: 0.78rem; border-left: 4px solid #3182f6; border-radius: 8px; margin-top: 0.75rem; }
             </style>
             <div class="flip-card">
                 <div class="flip-card-inner">
