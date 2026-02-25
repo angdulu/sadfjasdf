@@ -1,4 +1,3 @@
-
 import { scoreItem, validateItem } from './score.js';
 
 const ocrFileInput = document.getElementById('ocr-file');
@@ -7,6 +6,11 @@ const ocrRunButton = document.getElementById('ocr-run');
 const ocrStatus = document.getElementById('ocr-status');
 const ocrOutput = document.getElementById('ocr-output');
 const ocrPreview = document.getElementById('ocr-preview');
+
+const aiModelInput = document.getElementById('ai-model');
+const aiRunButton = document.getElementById('ai-run');
+const aiStatus = document.getElementById('ai-status');
+const aiOutput = document.getElementById('ai-output');
 
 let ocrFile = null;
 
@@ -59,6 +63,60 @@ if (ocrRunButton) {
             ocrStatus.textContent = 'Status: OCR failed. Try a clearer image.';
         } finally {
             ocrRunButton.disabled = false;
+        }
+    });
+}
+
+if (aiRunButton) {
+    aiRunButton.addEventListener('click', async () => {
+        const sourceText = ocrOutput?.value?.trim() || '';
+        const model = aiModelInput?.value?.trim() || '';
+
+        if (!sourceText) {
+            aiStatus.textContent = 'Status: OCR text is empty. Run OCR or paste ingredients first.';
+            return;
+        }
+        if (!model) {
+            aiStatus.textContent = 'Status: Please fill model.';
+            return;
+        }
+
+        aiRunButton.disabled = true;
+        aiStatus.textContent = 'Status: Analyzing with AI...';
+        aiOutput.value = '';
+
+        try {
+            const response = await fetch('/api/analyze', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    model,
+                    sourceText
+                })
+            });
+
+            const data = await response.json().catch(() => ({}));
+            if (!response.ok) {
+                const message = data?.error?.message || `HTTP ${response.status}`;
+                throw new Error(message);
+            }
+
+            const rawContent = data?.choices?.[0]?.message?.content;
+            if (!rawContent || typeof rawContent !== 'string') {
+                throw new Error('AI response missing content.');
+            }
+
+            const parsed = safeJsonParse(rawContent);
+            aiOutput.value = parsed ? formatAnalysis(parsed) : rawContent;
+            aiStatus.textContent = 'Status: AI analysis complete.';
+        } catch (error) {
+            console.error(error);
+            aiStatus.textContent = `Status: Analysis failed (${error.message}).`;
+            aiOutput.value = '분석에 실패했습니다. 서버 환경변수 OPENAI_API_KEY/모델 설정을 확인하세요.';
+        } finally {
+            aiRunButton.disabled = false;
         }
     });
 }
@@ -220,6 +278,48 @@ function getRiskMeta(level) {
         default:
             return { color: 'var(--secondary-color)', badge: 'var(--secondary-color)', icon: '' };
     }
+}
+
+function safeJsonParse(text) {
+    try {
+        return JSON.parse(text);
+    } catch {
+        return null;
+    }
+}
+
+function formatAnalysis(result) {
+    const lines = [];
+    lines.push(`요약: ${result.summary || '없음'}`);
+    lines.push('');
+    lines.push('성분 분석:');
+
+    const ingredients = Array.isArray(result.ingredients) ? result.ingredients : [];
+    if (ingredients.length === 0) {
+        lines.push('- 성분 항목 없음');
+    } else {
+        ingredients.forEach((ingredient, index) => {
+            lines.push(`${index + 1}. ${ingredient.name || '이름 미상'}`);
+            lines.push(`   역할: ${ingredient.role || '미상'}`);
+            lines.push(`   위험도: ${ingredient.risk || '불명'}`);
+            lines.push(`   메모: ${ingredient.notes || '없음'}`);
+        });
+    }
+
+    lines.push('');
+    lines.push('주의 포인트:');
+    const watchouts = Array.isArray(result.watchouts) ? result.watchouts : [];
+    if (watchouts.length === 0) {
+        lines.push('- 없음');
+    } else {
+        watchouts.forEach((value) => lines.push(`- ${value}`));
+    }
+
+    lines.push('');
+    lines.push(`신뢰도: ${result.confidence || '불명'}`);
+    lines.push(`면책: ${result.disclaimer || '의료 진단 대체 불가'}`);
+
+    return lines.join('\n');
 }
 
 function escapeHtml(text) {

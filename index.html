@@ -45,6 +45,27 @@
                 <div class="ocr-source">Source: ocr:tesseract.js</div>
             </div>
         </section>
+
+        <section class="ocr-panel">
+            <div class="ocr-header">
+                <h2>AI Ingredient Analysis</h2>
+                <p>Analyze OCR text through the server proxy. API key stays on server env.</p>
+            </div>
+            <div class="ocr-body">
+                <label class="ocr-field">
+                    <span>Model</span>
+                    <input type="text" id="ai-model" value="gpt-4.1-mini" placeholder="gpt-4.1-mini">
+                </label>
+                <button id="ai-run" class="ocr-button" type="button">Analyze Ingredients</button>
+                <div id="ai-status" class="ocr-status">Status: Idle</div>
+                <label class="ocr-field ai-full-width">
+                    <span>Analysis result</span>
+                    <textarea id="ai-output" rows="12" placeholder="AI analysis will appear here"></textarea>
+                </label>
+                <div class="ocr-source">Source: server proxy (/api/analyze)</div>
+            </div>
+        </section>
+
         <div class="search-container">
             <input type="text" id="search-bar" placeholder="Search for an item...">
         </div>
