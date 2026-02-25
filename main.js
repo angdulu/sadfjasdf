@@ -1,7 +1,6 @@
-import { scoreItem, validateItem } from './score.js';
-
 const ocrFileInput = document.getElementById('ocr-file');
 const ocrLangSelect = document.getElementById('ocr-lang');
+const ocrModeSelect = document.getElementById('ocr-mode');
 const ocrRunButton = document.getElementById('ocr-run');
 const ocrStatus = document.getElementById('ocr-status');
 const ocrOutput = document.getElementById('ocr-output');
@@ -18,49 +17,56 @@ if (ocrFileInput) {
     ocrFileInput.addEventListener('change', (event) => {
         const [file] = event.target.files;
         ocrFile = file || null;
-        if (ocrFile) {
-            const url = URL.createObjectURL(ocrFile);
-            ocrPreview.src = url;
-            ocrPreview.style.display = 'block';
-            ocrStatus.textContent = 'Status: Ready to run OCR';
-        } else {
+        if (!ocrFile) {
             ocrPreview.style.display = 'none';
             ocrStatus.textContent = 'Status: Idle';
+            return;
         }
+
+        const url = URL.createObjectURL(ocrFile);
+        ocrPreview.src = url;
+        ocrPreview.style.display = 'block';
+        ocrStatus.textContent = 'Status: Ready to extract';
     });
 }
 
 if (ocrRunButton) {
     ocrRunButton.addEventListener('click', async () => {
         if (!ocrFile) {
-            ocrStatus.textContent = 'Status: Please choose an image first.';
+            ocrStatus.textContent = 'Status: 이미지 파일을 먼저 선택하세요.';
             return;
         }
         if (!window.Tesseract) {
-            ocrStatus.textContent = 'Status: OCR engine not loaded.';
+            ocrStatus.textContent = 'Status: OCR 엔진 로드 실패';
             return;
         }
 
+        const lang = ocrLangSelect?.value || 'kor+eng';
+        const mode = ocrModeSelect?.value || 'auto';
+
         ocrRunButton.disabled = true;
-        ocrStatus.textContent = 'Status: OCR running...';
         ocrOutput.value = '';
+        ocrStatus.textContent = 'Status: OCR 준비 중...';
 
         try {
-            const lang = ocrLangSelect?.value || 'kor+eng';
-            const result = await window.Tesseract.recognize(ocrFile, lang, {
-                logger: (message) => {
-                    if (message.status && message.progress != null) {
-                        const pct = Math.round(message.progress * 100);
-                        ocrStatus.textContent = `Status: ${message.status} (${pct}%)`;
-                    }
+            const candidates = await buildOcrCandidates(ocrFile, mode);
+            let best = { text: '', score: -1 };
+
+            for (let i = 0; i < candidates.length; i += 1) {
+                const candidate = candidates[i];
+                const text = await runOcr(candidate.image, lang, `Pass ${i + 1}/${candidates.length}: ${candidate.name}`);
+                const score = scoreRecognizedText(text);
+                if (score > best.score) {
+                    best = { text, score };
                 }
-            });
-            const text = result?.data?.text?.trim() || '';
-            ocrOutput.value = text || 'No text detected.';
-            ocrStatus.textContent = 'Status: OCR complete.';
+            }
+
+            const finalText = (best.text || '').trim();
+            ocrOutput.value = finalText || '텍스트를 인식하지 못했습니다. 전처리를 바꾸거나 더 밝은 환경에서 다시 촬영하세요.';
+            ocrStatus.textContent = finalText ? 'Status: OCR complete' : 'Status: OCR complete (low confidence)';
         } catch (error) {
             console.error(error);
-            ocrStatus.textContent = 'Status: OCR failed. Try a clearer image.';
+            ocrStatus.textContent = `Status: OCR failed (${error.message})`;
         } finally {
             ocrRunButton.disabled = false;
         }
@@ -73,28 +79,23 @@ if (aiRunButton) {
         const model = aiModelInput?.value?.trim() || '';
 
         if (!sourceText) {
-            aiStatus.textContent = 'Status: OCR text is empty. Run OCR or paste ingredients first.';
+            aiStatus.textContent = 'Status: OCR 텍스트가 비어 있습니다.';
             return;
         }
         if (!model) {
-            aiStatus.textContent = 'Status: Please fill model.';
+            aiStatus.textContent = 'Status: 모델명을 입력하세요.';
             return;
         }
 
         aiRunButton.disabled = true;
-        aiStatus.textContent = 'Status: Analyzing with AI...';
+        aiStatus.textContent = 'Status: 분석 중...';
         aiOutput.value = '';
 
         try {
             const response = await fetch('/api/analyze', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model,
-                    sourceText
-                })
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ model, sourceText })
             });
 
             const data = await response.json().catch(() => ({}));
@@ -110,174 +111,123 @@ if (aiRunButton) {
 
             const parsed = safeJsonParse(rawContent);
             aiOutput.value = parsed ? formatAnalysis(parsed) : rawContent;
-            aiStatus.textContent = 'Status: AI analysis complete.';
+            aiStatus.textContent = 'Status: 분석 완료';
         } catch (error) {
             console.error(error);
-            aiStatus.textContent = `Status: Analysis failed (${error.message}).`;
-            aiOutput.value = `분석 실패: ${error.message}\n\n서버 환경변수 OPENAI_API_KEY/모델 설정을 확인하세요.`;
+            aiStatus.textContent = `Status: 분석 실패 (${error.message})`;
+            aiOutput.value = `분석 실패: ${error.message}\n\n서버 OPENAI_API_KEY/모델 설정을 확인하세요.`;
         } finally {
             aiRunButton.disabled = false;
         }
     });
 }
 
-class ItemCard extends HTMLElement {
-    constructor() {
-        super();
-        this.attachShadow({ mode: 'open' });
-        this.item = null;
+async function buildOcrCandidates(file, mode) {
+    const original = { name: '원본', image: file };
+
+    if (mode === 'none') {
+        return [original];
     }
 
-    connectedCallback() {
-        if (this.item) {
-            this.render();
-        }
+    if (mode === 'contrast') {
+        return [
+            { name: '명암 강화', image: await preprocessImage(file, 'contrast') },
+            original
+        ];
     }
 
-    set data(item) {
-        this.item = item;
-        if (this.isConnected) {
-            this.render();
-        }
+    if (mode === 'bw') {
+        return [
+            { name: '흑백 이진화', image: await preprocessImage(file, 'bw') },
+            original
+        ];
     }
 
-    render() {
-        const item = this.item;
-        if (!item) {
-            return;
-        }
-
-        const scored = scoreItem(item);
-        const riskLevel = scored.level;
-        const riskMeta = getRiskMeta(riskLevel);
-
-        const renderField = (label, field) => `
-            <div class="field">
-                <div class="field-label">${label}</div>
-                <div class="field-value">${escapeHtml(field?.value ?? 'Unavailable')}</div>
-                <div class="field-source">Source: ${escapeHtml(field?.source ?? 'Unspecified')}</div>
-            </div>
-        `;
-
-        this.shadowRoot.innerHTML = `
-            <style>
-                .flip-card { background-color: transparent; width: 100%; height: 520px; border-radius: 18px; perspective: 1000px; }
-                .flip-card-inner { position: relative; width: 100%; height: 100%; text-align: center; transition: transform 0.65s; transform-style: preserve-3d; box-shadow: 0 12px 28px rgba(15,23,42,0.1); border-radius: 18px; border: 1px solid #eef2f8; }
-                .flip-card.flipped .flip-card-inner { transform: rotateY(180deg); }
-                .flip-card-front, .flip-card-back { position: absolute; width: 100%; height: 100%; -webkit-backface-visibility: hidden; backface-visibility: hidden; border-radius: 18px; overflow: hidden; display: flex; flex-direction: column; }
-                .flip-card-front { background-color: #ffffff; }
-                .flip-card-back { background-color: #ffffff; transform: rotateY(180deg); padding: 1.15rem 1.25rem; justify-content: flex-start; text-align: left; overflow-y: auto; }
-                .card-image { width: 100%; height: 190px; object-fit: cover; }
-                .card-header { padding: 0.9rem; color: #fff; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 0.45rem; letter-spacing: -0.01em; }
-                .risk-icon { width: 24px; height: 24px; }
-                .card-content { padding: 1rem 1rem 1.1rem; flex-grow: 1; text-align: left; }
-                h3 { margin: 0 0 0.6rem 0; font-size: 1.3rem; letter-spacing: -0.02em; }
-                .tag { display: inline-flex; align-items: center; gap: 0.35rem; padding: 0.25rem 0.7rem; border-radius: 999px; background: ${riskMeta.badge}; color: #fff; font-size: 0.8rem; font-weight: 700; }
-                .note { margin: 0.55rem 0 0.7rem 0; font-size: 0.9rem; color: #5a6478; }
-                .field { margin-bottom: 0.65rem; }
-                .field-label { font-weight: 700; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.035em; color: #4e586b; }
-                .field-value { margin-top: 0.2rem; font-size: 0.93rem; color: #1d2433; }
-                .field-source { margin-top: 0.2rem; font-size: 0.76rem; color: #8993a6; }
-                .section-title { margin: 0.95rem 0 0.45rem 0; font-size: 0.92rem; font-weight: 700; color: #343d4d; }
-                .recommendation { font-style: italic; background-color: #f4f8ff; padding: 0.78rem; border-left: 4px solid #3182f6; border-radius: 8px; margin-top: 0.75rem; }
-            </style>
-            <div class="flip-card">
-                <div class="flip-card-inner">
-                    <div class="flip-card-front">
-                        <div class="card-header" style="background-color: ${riskMeta.color};">
-                            ${riskMeta.icon}
-                            <span>${escapeHtml(item.name.value)}</span>
-                        </div>
-                        <img class="card-image" src="${escapeHtml(item.image.value)}" alt="${escapeHtml(item.name.value)}">
-                        <div class="card-content">
-                            <div class="tag">${escapeHtml(riskLevel)}</div>
-                            <p class="note">Hazard and risk are shown separately. Click for details.</p>
-                            <div class="field-source">Source (name): ${escapeHtml(item.name.source)}</div>
-                            <div class="field-source">Source (image): ${escapeHtml(item.image.source)}</div>
-                            <div class="field-source">Source (risk level): ${escapeHtml(item.risk.level.source)}</div>
-                        </div>
-                    </div>
-                    <div class="flip-card-back">
-                        <h3>${escapeHtml(item.name.value)}</h3>
-                        <div class="section-title">Item</div>
-                        ${renderField('Name', item.name)}
-                        ${renderField('Image URL', item.image)}
-                        <div class="section-title">Hazard</div>
-                        ${renderField('Hazard Summary', item.hazard.summary)}
-                        ${renderField('Evidence Grade', item.hazard.evidence_grade)}
-                        ${renderField('Uncertainty Interval', item.hazard.uncertainty_interval)}
-                        <div class="section-title">Exposure</div>
-                        ${renderField('Exposure Summary', item.exposure.summary)}
-                        ${renderField('Exposure Availability', item.exposure.availability)}
-                        <div class="section-title">Risk</div>
-                        ${renderField('Risk Summary', item.risk.summary)}
-                        ${renderField('Risk Level', item.risk.level)}
-                        ${renderField('Evidence Grade', item.risk.evidence_grade)}
-                        ${renderField('Uncertainty Interval', item.risk.uncertainty_interval)}
-                        ${scored.indeterminate ? `<p class="note"><strong>Risk indeterminate:</strong> ${escapeHtml(scored.reason)}.</p>` : ''}
-                        <div class="recommendation">
-                            <strong>Recommendation:</strong> ${escapeHtml(item.recommendation.value)}
-                            <div class="field-source">Source: ${escapeHtml(item.recommendation.source)}</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        `;
-
-        this.shadowRoot.querySelector('.flip-card').addEventListener('click', () => {
-            this.shadowRoot.querySelector('.flip-card').classList.toggle('flipped');
-        });
-    }
+    return [
+        { name: '명암 강화', image: await preprocessImage(file, 'contrast') },
+        { name: '흑백 이진화', image: await preprocessImage(file, 'bw') },
+        original
+    ];
 }
 
-customElements.define('item-card', ItemCard);
-
-const itemGrid = document.getElementById('item-grid');
-const searchBar = document.getElementById('search-bar');
-let items = [];
-
-fetch('items.json')
-    .then(response => response.json())
-    .then(data => {
-        items = data;
-        const errors = items.flatMap(item => validateItem(item).map(error => `${item.name?.value || 'Unknown'}: ${error}`));
-        if (errors.length > 0) {
-            console.warn('Validation issues:', errors);
+async function runOcr(imageLike, lang, label) {
+    const result = await window.Tesseract.recognize(imageLike, lang, {
+        logger: (message) => {
+            if (!message.status || message.progress == null) {
+                return;
+            }
+            const pct = Math.round(message.progress * 100);
+            ocrStatus.textContent = `Status: ${label} - ${message.status} (${pct}%)`;
         }
-        displayItems(items);
-    })
-    .catch(error => console.error('Error fetching items:', error));
+    });
 
-function displayItems(itemsToDisplay) {
-    itemGrid.innerHTML = '';
-    itemsToDisplay.forEach(item => {
-        const itemCard = document.createElement('item-card');
-        itemCard.data = item;
-        itemGrid.appendChild(itemCard);
+    return (result?.data?.text || '').trim();
+}
+
+function scoreRecognizedText(text) {
+    if (!text) {
+        return 0;
+    }
+    const normalized = text.replace(/\s+/g, ' ').trim();
+    const words = normalized.split(' ').filter(Boolean).length;
+    const koreanChars = (normalized.match(/[가-힣]/g) || []).length;
+    const alphaNum = (normalized.match(/[A-Za-z0-9]/g) || []).length;
+    return normalized.length + (words * 4) + koreanChars + Math.floor(alphaNum * 0.4);
+}
+
+async function preprocessImage(file, mode) {
+    const bitmap = await createImageBitmap(file);
+    const maxSide = 2400;
+    const scale = Math.min(2, maxSide / Math.max(bitmap.width, bitmap.height));
+    const width = Math.max(1, Math.round(bitmap.width * scale));
+    const height = Math.max(1, Math.round(bitmap.height * scale));
+
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+
+    ctx.drawImage(bitmap, 0, 0, width, height);
+    const imageData = ctx.getImageData(0, 0, width, height);
+    const data = imageData.data;
+
+    let luminanceSum = 0;
+    for (let i = 0; i < data.length; i += 4) {
+        const lum = (0.299 * data[i]) + (0.587 * data[i + 1]) + (0.114 * data[i + 2]);
+        luminanceSum += lum;
+    }
+    const meanLum = luminanceSum / (data.length / 4);
+
+    for (let i = 0; i < data.length; i += 4) {
+        const lum = (0.299 * data[i]) + (0.587 * data[i + 1]) + (0.114 * data[i + 2]);
+        let value = lum;
+
+        if (mode === 'contrast') {
+            value = clamp((lum - meanLum) * 1.9 + meanLum + 10, 0, 255);
+        } else if (mode === 'bw') {
+            const threshold = clamp(meanLum - 8, 90, 170);
+            value = lum > threshold ? 255 : 0;
+        }
+
+        data[i] = value;
+        data[i + 1] = value;
+        data[i + 2] = value;
+    }
+
+    ctx.putImageData(imageData, 0, 0);
+    return await new Promise((resolve, reject) => {
+        canvas.toBlob((blob) => {
+            if (!blob) {
+                reject(new Error('Failed to preprocess image'));
+                return;
+            }
+            resolve(blob);
+        }, 'image/png', 1);
     });
 }
 
-searchBar.addEventListener('input', (e) => {
-    const searchTerm = e.target.value.toLowerCase();
-    const filteredItems = items.filter(item =>
-        item.name.value.toLowerCase().includes(searchTerm)
-    );
-    displayItems(filteredItems);
-});
-
-function getRiskMeta(level) {
-    switch (level) {
-        case 'Low':
-            return { color: 'var(--risk-low-color)', badge: 'var(--risk-low-color)', icon: iconCheck() };
-        case 'Medium':
-            return { color: 'var(--risk-medium-color)', badge: 'var(--risk-medium-color)', icon: iconWarn() };
-        case 'High':
-            return { color: 'var(--risk-high-color)', badge: 'var(--risk-high-color)', icon: iconAlert() };
-        case 'Indeterminate':
-            return { color: 'var(--risk-indeterminate-color)', badge: 'var(--risk-indeterminate-color)', icon: iconUnknown() };
-        default:
-            return { color: 'var(--secondary-color)', badge: 'var(--secondary-color)', icon: '' };
-    }
+function clamp(value, min, max) {
+    return Math.min(max, Math.max(min, value));
 }
 
 function safeJsonParse(text) {
@@ -320,29 +270,4 @@ function formatAnalysis(result) {
     lines.push(`면책: ${result.disclaimer || '의료 진단 대체 불가'}`);
 
     return lines.join('\n');
-}
-
-function escapeHtml(text) {
-    return String(text)
-        .replaceAll('&', '&amp;')
-        .replaceAll('<', '&lt;')
-        .replaceAll('>', '&gt;')
-        .replaceAll('"', '&quot;')
-        .replaceAll("'", '&#039;');
-}
-
-function iconCheck() {
-    return `<svg class="risk-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>`;
-}
-
-function iconWarn() {
-    return `<svg class="risk-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/></svg>`;
-}
-
-function iconAlert() {
-    return `<svg class="risk-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>`;
-}
-
-function iconUnknown() {
-    return `<svg class="risk-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 17h-1.9v-1.9H12V19zm2.1-7.8c-.2.5-.5.9-1 1.4l-.8.8c-.4.4-.6.9-.6 1.5v.6h-1.9v-.7c0-.8.3-1.5.9-2.1l1-1c.3-.3.5-.6.5-1 0-.8-.6-1.4-1.6-1.4-1 0-1.7.5-2.1 1.5l-1.7-.9C6.4 7 7.6 6 9.7 6c2.2 0 3.6 1.2 3.6 3.1 0 .4-.1.8-.3 1.1z"/></svg>`;
 }

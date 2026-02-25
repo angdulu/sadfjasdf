@@ -3,75 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Risk Radar</title>
+    <title>Risk Radar OCR</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css">
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <header>
-        <h1>Risk Radar</h1>
-        <p>Hazard vs. risk, with evidence grades and uncertainty intervals.</p>
-    </header>
-    <main>
-        <section class="ocr-panel">
-            <div class="ocr-header">
-                <h2>Camera OCR</h2>
-                <p>Take a photo of the ingredient label. OCR runs in the browser.</p>
+    <main class="container">
+        <header class="hero">
+            <h1>성분 촬영 분석</h1>
+            <p>사진을 찍고, OCR로 텍스트를 추출한 뒤 AI로 바로 분석합니다.</p>
+        </header>
+
+        <section class="panel">
+            <div class="panel-header">
+                <h2>1) OCR</h2>
+                <p>전처리 모드로 인식 품질을 높입니다.</p>
             </div>
-            <div class="ocr-body">
-                <label class="ocr-field">
-                    <span>Image input</span>
+            <div class="panel-body">
+                <label class="field">
+                    <span>이미지 선택</span>
                     <input type="file" id="ocr-file" accept="image/*" capture="environment">
                 </label>
-                <label class="ocr-field">
-                    <span>OCR language</span>
+                <label class="field">
+                    <span>언어</span>
                     <select id="ocr-lang">
-                        <option value="kor+eng" selected>Korean + English</option>
-                        <option value="kor">Korean</option>
-                        <option value="eng">English</option>
+                        <option value="kor+eng" selected>한국어 + 영어</option>
+                        <option value="kor">한국어</option>
+                        <option value="eng">영어</option>
                     </select>
                 </label>
-                <button id="ocr-run" class="ocr-button" type="button">Run OCR</button>
-                <div id="ocr-status" class="ocr-status">Status: Idle</div>
-                <div class="ocr-preview">
+                <label class="field">
+                    <span>전처리</span>
+                    <select id="ocr-mode">
+                        <option value="auto" selected>자동(권장)</option>
+                        <option value="contrast">명암 강화</option>
+                        <option value="bw">흑백 이진화</option>
+                        <option value="none">원본</option>
+                    </select>
+                </label>
+                <button id="ocr-run" class="btn" type="button">텍스트 추출</button>
+                <div id="ocr-status" class="status">Status: Idle</div>
+                <div class="preview">
                     <img id="ocr-preview" alt="OCR preview">
                 </div>
-                <label class="ocr-field">
-                    <span>Extracted text</span>
-                    <textarea id="ocr-output" rows="6" placeholder="OCR text will appear here"></textarea>
+                <label class="field full">
+                    <span>추출된 텍스트</span>
+                    <textarea id="ocr-output" rows="8" placeholder="OCR 결과가 여기에 표시됩니다."></textarea>
                 </label>
-                <div class="ocr-source">Source: ocr:tesseract.js</div>
             </div>
         </section>
 
-        <section class="ocr-panel">
-            <div class="ocr-header">
-                <h2>AI Ingredient Analysis</h2>
-                <p>Analyze OCR text through the server proxy. API key stays on server env.</p>
+        <section class="panel">
+            <div class="panel-header">
+                <h2>2) AI 분석</h2>
+                <p>서버 프록시를 통해 키 노출 없이 성분을 분석합니다.</p>
             </div>
-            <div class="ocr-body">
-                <label class="ocr-field">
-                    <span>Model</span>
+            <div class="panel-body">
+                <label class="field">
+                    <span>모델</span>
                     <input type="text" id="ai-model" value="gpt-4.1-mini" placeholder="gpt-4.1-mini">
                 </label>
-                <button id="ai-run" class="ocr-button" type="button">Analyze Ingredients</button>
-                <div id="ai-status" class="ocr-status">Status: Idle</div>
-                <label class="ocr-field ai-full-width">
-                    <span>Analysis result</span>
-                    <textarea id="ai-output" rows="12" placeholder="AI analysis will appear here"></textarea>
+                <button id="ai-run" class="btn" type="button">성분 분석</button>
+                <div id="ai-status" class="status">Status: Idle</div>
+                <label class="field full">
+                    <span>분석 결과</span>
+                    <textarea id="ai-output" rows="12" placeholder="AI 분석 결과가 여기에 표시됩니다."></textarea>
                 </label>
-                <div class="ocr-source">Source: server proxy (/api/analyze)</div>
             </div>
         </section>
-
-        <div class="search-container">
-            <input type="text" id="search-bar" placeholder="Search for an item...">
-        </div>
-        <div id="item-grid" class="item-grid"></div>
     </main>
-    <footer>
-        <p>&copy; 2024 Risk Radar. All rights reserved.</p>
-    </footer>
+
     <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script src="main.js" type="module"></script>
 </body>
