@@ -15,6 +15,36 @@
         <p>Hazard vs. risk, with evidence grades and uncertainty intervals.</p>
     </header>
     <main>
+        <section class="ocr-panel">
+            <div class="ocr-header">
+                <h2>Camera OCR</h2>
+                <p>Take a photo of the ingredient label. OCR runs in the browser.</p>
+            </div>
+            <div class="ocr-body">
+                <label class="ocr-field">
+                    <span>Image input</span>
+                    <input type="file" id="ocr-file" accept="image/*" capture="environment">
+                </label>
+                <label class="ocr-field">
+                    <span>OCR language</span>
+                    <select id="ocr-lang">
+                        <option value="kor+eng" selected>Korean + English</option>
+                        <option value="kor">Korean</option>
+                        <option value="eng">English</option>
+                    </select>
+                </label>
+                <button id="ocr-run" class="ocr-button" type="button">Run OCR</button>
+                <div id="ocr-status" class="ocr-status">Status: Idle</div>
+                <div class="ocr-preview">
+                    <img id="ocr-preview" alt="OCR preview">
+                </div>
+                <label class="ocr-field">
+                    <span>Extracted text</span>
+                    <textarea id="ocr-output" rows="6" placeholder="OCR text will appear here"></textarea>
+                </label>
+                <div class="ocr-source">Source: ocr:tesseract.js</div>
+            </div>
+        </section>
         <div class="search-container">
             <input type="text" id="search-bar" placeholder="Search for an item...">
         </div>
@@ -23,6 +53,7 @@
     <footer>
         <p>&copy; 2024 Risk Radar. All rights reserved.</p>
     </footer>
+    <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
     <script src="main.js" type="module"></script>
 </body>
 </html>

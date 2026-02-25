@@ -1,6 +1,68 @@
 
 import { scoreItem, validateItem } from './score.js';
 
+const ocrFileInput = document.getElementById('ocr-file');
+const ocrLangSelect = document.getElementById('ocr-lang');
+const ocrRunButton = document.getElementById('ocr-run');
+const ocrStatus = document.getElementById('ocr-status');
+const ocrOutput = document.getElementById('ocr-output');
+const ocrPreview = document.getElementById('ocr-preview');
+
+let ocrFile = null;
+
+if (ocrFileInput) {
+    ocrFileInput.addEventListener('change', (event) => {
+        const [file] = event.target.files;
+        ocrFile = file || null;
+        if (ocrFile) {
+            const url = URL.createObjectURL(ocrFile);
+            ocrPreview.src = url;
+            ocrPreview.style.display = 'block';
+            ocrStatus.textContent = 'Status: Ready to run OCR';
+        } else {
+            ocrPreview.style.display = 'none';
+            ocrStatus.textContent = 'Status: Idle';
+        }
+    });
+}
+
+if (ocrRunButton) {
+    ocrRunButton.addEventListener('click', async () => {
+        if (!ocrFile) {
+            ocrStatus.textContent = 'Status: Please choose an image first.';
+            return;
+        }
+        if (!window.Tesseract) {
+            ocrStatus.textContent = 'Status: OCR engine not loaded.';
+            return;
+        }
+
+        ocrRunButton.disabled = true;
+        ocrStatus.textContent = 'Status: OCR running...';
+        ocrOutput.value = '';
+
+        try {
+            const lang = ocrLangSelect?.value || 'kor+eng';
+            const result = await window.Tesseract.recognize(ocrFile, lang, {
+                logger: (message) => {
+                    if (message.status && message.progress != null) {
+                        const pct = Math.round(message.progress * 100);
+                        ocrStatus.textContent = `Status: ${message.status} (${pct}%)`;
+                    }
+                }
+            });
+            const text = result?.data?.text?.trim() || '';
+            ocrOutput.value = text || 'No text detected.';
+            ocrStatus.textContent = 'Status: OCR complete.';
+        } catch (error) {
+            console.error(error);
+            ocrStatus.textContent = 'Status: OCR failed. Try a clearer image.';
+        } finally {
+            ocrRunButton.disabled = false;
+        }
+    });
+}
+
 class ItemCard extends HTMLElement {
     constructor() {
         super();
