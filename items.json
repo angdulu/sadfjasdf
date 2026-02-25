@@ -1,44 +1,164 @@
 [
   {
-    "name": "Plastic Water Bottles",
-    "risk": "Medium",
-    "image": "https://images.unsplash.com/photo-1582215421598-43331a92a55d?q=80&w=1974&auto=format&fit=crop",
-    "description": "Plastic bottles can leach chemicals like BPA and antimony into water, especially when exposed to heat. These chemicals are potential endocrine disruptors.",
-    "recommendation": "Opt for reusable glass or stainless steel bottles. If using plastic, avoid leaving them in hot cars and recycle them after a single use."
+    "id": "plastic-water-bottles",
+    "name": { "value": "Plastic Water Bottles", "source": "db:items_v1" },
+    "image": { "value": "https://images.unsplash.com/photo-1582215421598-43331a92a55d?q=80&w=1974&auto=format&fit=crop", "source": "api:unsplash" },
+    "hazard": {
+      "summary": {
+        "value": "Certain plastics can leach endocrine-active compounds when exposed to heat or sunlight.",
+        "source": "db:hazard_reviews_v1"
+      },
+      "evidence_grade": { "value": "B", "source": "db:hazard_reviews_v1" },
+      "uncertainty_interval": { "value": "0.35-0.60", "source": "api:hazard_uq_v2" }
+    },
+    "exposure": {
+      "summary": { "value": "Typical consumer exposure occurs through repeated reuse and heat exposure.", "source": "db:exposure_estimates_v3" },
+      "availability": { "value": "Partial", "source": "db:exposure_estimates_v3" }
+    },
+    "risk": {
+      "summary": { "value": "Risk depends on heat exposure and reuse frequency; avoid heat to reduce exposure.", "source": "api:risk_reasoner_v1" },
+      "level": { "value": "Medium", "source": "api:risk_reasoner_v1" },
+      "evidence_grade": { "value": "C", "source": "api:risk_reasoner_v1" },
+      "uncertainty_interval": { "value": "0.50-0.75", "source": "api:risk_reasoner_v1" }
+    },
+    "recommendation": {
+      "value": "Prefer glass or stainless steel. If using plastic, avoid heat and replace frequently.",
+      "source": "db:internal_guidance_v2"
+    }
   },
   {
-    "name": "Non-stick Cookware",
-    "risk": "High",
-    "image": "https://images.unsplash.com/photo-1588072494480-5b5840652014?q=80&w=2070&auto=format&fit=crop",
-    "description": "When overheated, non-stick coatings (like Teflon) can release perfluorooctanoic acid (PFOA), a chemical linked to various health issues.",
-    "recommendation": "Use cast iron, stainless steel, or ceramic cookware. If using non-stick, cook on low to medium heat and avoid using metal utensils."
+    "id": "non-stick-cookware",
+    "name": { "value": "Non-stick Cookware", "source": "db:items_v1" },
+    "image": { "value": "https://images.unsplash.com/photo-1588072494480-5b5840652014?q=80&w=2070&auto=format&fit=crop", "source": "api:unsplash" },
+    "hazard": {
+      "summary": {
+        "value": "Overheating some non-stick coatings can release fluorinated compounds with potential health concerns.",
+        "source": "db:hazard_reviews_v1"
+      },
+      "evidence_grade": { "value": "B", "source": "db:hazard_reviews_v1" },
+      "uncertainty_interval": { "value": "0.30-0.55", "source": "api:hazard_uq_v2" }
+    },
+    "exposure": {
+      "summary": { "value": "Exposure is linked to high-temperature use and damaged coatings.", "source": "db:exposure_estimates_v3" },
+      "availability": { "value": "Moderate", "source": "db:exposure_estimates_v3" }
+    },
+    "risk": {
+      "summary": { "value": "Risk elevates with frequent high-heat cooking or degraded surfaces.", "source": "api:risk_reasoner_v1" },
+      "level": { "value": "High", "source": "api:risk_reasoner_v1" },
+      "evidence_grade": { "value": "B", "source": "api:risk_reasoner_v1" },
+      "uncertainty_interval": { "value": "0.45-0.70", "source": "api:risk_reasoner_v1" }
+    },
+    "recommendation": {
+      "value": "Use low to medium heat, avoid metal utensils, and replace when the coating degrades.",
+      "source": "db:internal_guidance_v2"
+    }
   },
   {
-    "name": "Artificial Sweeteners",
-    "risk": "Medium",
-    "image": "https://images.unsplash.com/photo-1621295251641-558273d63b65?q=80&w=1932&auto=format&fit=crop",
-    "description": "Some studies suggest that long-term consumption of artificial sweeteners could alter gut bacteria and may be associated with metabolic issues.",
-    "recommendation": "Reduce overall sugar intake. Use natural sweeteners like stevia or monk fruit in moderation."
+    "id": "artificial-sweeteners",
+    "name": { "value": "Artificial Sweeteners", "source": "db:items_v1" },
+    "image": { "value": "https://images.unsplash.com/photo-1621295251641-558273d63b65?q=80&w=1932&auto=format&fit=crop", "source": "api:unsplash" },
+    "hazard": {
+      "summary": {
+        "value": "Some studies report metabolic or microbiome changes, but findings are mixed across compounds.",
+        "source": "db:hazard_reviews_v1"
+      },
+      "evidence_grade": { "value": "C", "source": "db:hazard_reviews_v1" },
+      "uncertainty_interval": { "value": "0.45-0.70", "source": "api:hazard_uq_v2" }
+    },
+    "exposure": {
+      "summary": { "value": "No population-level exposure measurements are available for this dataset.", "source": "db:exposure_estimates_v3" },
+      "availability": { "value": "Missing", "source": "db:exposure_estimates_v3" }
+    },
+    "risk": {
+      "summary": { "value": "Risk indeterminate because exposure data are missing.", "source": "api:risk_reasoner_v1" },
+      "level": { "value": "Indeterminate", "source": "api:risk_reasoner_v1" },
+      "evidence_grade": { "value": "D", "source": "api:risk_reasoner_v1" },
+      "uncertainty_interval": { "value": "0.80-1.00", "source": "api:risk_reasoner_v1" }
+    },
+    "recommendation": {
+      "value": "Limit overall sweetener intake and prioritize whole-food sources when possible.",
+      "source": "db:internal_guidance_v2"
+    }
   },
   {
-    "name": "Air Fresheners",
-    "risk": "Medium",
-    "image": "https://images.unsplash.com/photo-1543236029-92f5e334c2d3?q=80&w=2070&auto=format&fit=crop",
-    "description": "Many air fresheners contain volatile organic compounds (VOCs) and phthalates, which can trigger allergies and asthma and may be endocrine disruptors.",
-    "recommendation": "Use natural alternatives like essential oil diffusers, opening windows for ventilation, or simmering spices on the stove."
+    "id": "air-fresheners",
+    "name": { "value": "Air Fresheners", "source": "db:items_v1" },
+    "image": { "value": "https://images.unsplash.com/photo-1543236029-92f5e334c2d3?q=80&w=2070&auto=format&fit=crop", "source": "api:unsplash" },
+    "hazard": {
+      "summary": {
+        "value": "Many products emit VOCs and fragrance mixtures that can irritate airways.",
+        "source": "db:hazard_reviews_v1"
+      },
+      "evidence_grade": { "value": "B", "source": "db:hazard_reviews_v1" },
+      "uncertainty_interval": { "value": "0.30-0.55", "source": "api:hazard_uq_v2" }
+    },
+    "exposure": {
+      "summary": { "value": "Indoor use can lead to sustained low-level inhalation exposure.", "source": "db:exposure_estimates_v3" },
+      "availability": { "value": "Moderate", "source": "db:exposure_estimates_v3" }
+    },
+    "risk": {
+      "summary": { "value": "Risk increases with frequent indoor use and poor ventilation.", "source": "api:risk_reasoner_v1" },
+      "level": { "value": "Medium", "source": "api:risk_reasoner_v1" },
+      "evidence_grade": { "value": "B", "source": "api:risk_reasoner_v1" },
+      "uncertainty_interval": { "value": "0.40-0.65", "source": "api:risk_reasoner_v1" }
+    },
+    "recommendation": {
+      "value": "Ventilate rooms regularly or use non-fragrance alternatives.",
+      "source": "db:internal_guidance_v2"
+    }
   },
   {
-    "name": "Processed Meats",
-    "risk": "High",
-    "image": "https://images.unsplash.com/photo-1591989429443-4a15a0548123?q=80&w=1974&auto=format&fit=crop",
-    "description": "The World Health Organization has classified processed meats as a Group 1 carcinogen, linked to an increased risk of colorectal cancer.",
-    "recommendation": "Limit consumption of processed meats like bacon, sausage, and hot dogs. Choose fresh, unprocessed cuts of meat whenever possible."
+    "id": "processed-meats",
+    "name": { "value": "Processed Meats", "source": "db:items_v1" },
+    "image": { "value": "https://images.unsplash.com/photo-1591989429443-4a15a0548123?q=80&w=1974&auto=format&fit=crop", "source": "api:unsplash" },
+    "hazard": {
+      "summary": {
+        "value": "Nitrite curing and high-temperature processing are associated with carcinogenic byproducts.",
+        "source": "db:hazard_reviews_v1"
+      },
+      "evidence_grade": { "value": "A", "source": "db:hazard_reviews_v1" },
+      "uncertainty_interval": { "value": "0.20-0.40", "source": "api:hazard_uq_v2" }
+    },
+    "exposure": {
+      "summary": { "value": "Exposure is linked to consumption frequency and portion size.", "source": "db:exposure_estimates_v3" },
+      "availability": { "value": "High", "source": "db:exposure_estimates_v3" }
+    },
+    "risk": {
+      "summary": { "value": "Risk is higher with frequent intake; moderation lowers exposure.", "source": "api:risk_reasoner_v1" },
+      "level": { "value": "High", "source": "api:risk_reasoner_v1" },
+      "evidence_grade": { "value": "A", "source": "api:risk_reasoner_v1" },
+      "uncertainty_interval": { "value": "0.25-0.45", "source": "api:risk_reasoner_v1" }
+    },
+    "recommendation": {
+      "value": "Limit processed meat intake and choose fresh, unprocessed options when possible.",
+      "source": "db:internal_guidance_v2"
+    }
   },
   {
-    "name": "Canned Foods",
-    "risk": "Low",
-    "image": "https://images.unsplash.com/photo-1628100057554-b4a08596b6a2?q=80&w=2070&auto=format&fit=crop",
-    "description": "Some cans are lined with a resin containing BPA. While the risk is generally low, it's a known endocrine disruptor. Acidic foods can increase leaching.",
-    "recommendation": "Look for cans labeled \"BPA-free.\" Whenever possible, choose fresh or frozen foods over canned versions."
+    "id": "canned-foods",
+    "name": { "value": "Canned Foods", "source": "db:items_v1" },
+    "image": { "value": "https://images.unsplash.com/photo-1628100057554-b4a08596b6a2?q=80&w=2070&auto=format&fit=crop", "source": "api:unsplash" },
+    "hazard": {
+      "summary": {
+        "value": "Some can linings contain endocrine-active compounds that may migrate into food.",
+        "source": "db:hazard_reviews_v1"
+      },
+      "evidence_grade": { "value": "C", "source": "db:hazard_reviews_v1" },
+      "uncertainty_interval": { "value": "0.40-0.70", "source": "api:hazard_uq_v2" }
+    },
+    "exposure": {
+      "summary": { "value": "Exposure depends on lining type and food acidity.", "source": "db:exposure_estimates_v3" },
+      "availability": { "value": "Partial", "source": "db:exposure_estimates_v3" }
+    },
+    "risk": {
+      "summary": { "value": "Risk varies by can lining and consumption patterns.", "source": "api:risk_reasoner_v1" },
+      "level": { "value": "Low", "source": "api:risk_reasoner_v1" },
+      "evidence_grade": { "value": "C", "source": "api:risk_reasoner_v1" },
+      "uncertainty_interval": { "value": "0.45-0.70", "source": "api:risk_reasoner_v1" }
+    },
+    "recommendation": {
+      "value": "Prefer BPA-free linings and rotate with fresh or frozen foods.",
+      "source": "db:internal_guidance_v2"
+    }
   }
 ]

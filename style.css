@@ -10,6 +10,7 @@
     --risk-low-color: #28a745;
     --risk-medium-color: #ffc107;
     --risk-high-color: #dc3545;
+    --risk-indeterminate-color: #6c757d;
 
     --font-family-main: 'Roboto', sans-serif;
 }
@@ -81,7 +82,7 @@ main {
 .flip-card {
     background-color: transparent;
     width: 100%;
-    height: 450px; /* Adjust height as needed */
+    height: 520px;
     border-radius: 15px;
     perspective: 1000px;
 }
@@ -121,8 +122,10 @@ main {
 .flip-card-back {
     background-color: var(--card-background-color);
     transform: rotateY(180deg);
-    padding: 1.5rem;
-    justify-content: center;
+    padding: 1.2rem 1.5rem;
+    justify-content: flex-start;
+    text-align: left;
+    overflow-y: auto;
 }
 
 .card-image {
@@ -149,11 +152,61 @@ main {
 .card-content {
     padding: 1rem;
     flex-grow: 1;
+    text-align: left;
 }
 
 h3 {
-    margin-top: 0;
-    font-size: 1.5rem;
+    margin: 0 0 0.6rem 0;
+    font-size: 1.4rem;
+}
+
+.tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    background: var(--secondary-color);
+    color: #fff;
+    font-size: 0.85rem;
+    font-weight: 700;
+}
+
+.note {
+    margin: 0.6rem 0 0.8rem 0;
+    font-size: 0.9rem;
+    color: #495057;
+}
+
+.field {
+    margin-bottom: 0.7rem;
+}
+
+.field-label {
+    font-weight: 700;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: #495057;
+}
+
+.field-value {
+    margin-top: 0.2rem;
+    font-size: 0.95rem;
+    color: #212529;
+}
+
+.field-source {
+    margin-top: 0.2rem;
+    font-size: 0.78rem;
+    color: #6c757d;
+}
+
+.section-title {
+    margin: 1rem 0 0.5rem 0;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #343a40;
 }
 
 .recommendation {
@@ -162,7 +215,7 @@ h3 {
     padding: 0.8rem;
     border-left: 4px solid var(--primary-color);
     border-radius: 5px;
-    margin-top: auto; /* Push to the bottom */
+    margin-top: 0.8rem;
 }
 
 footer {
