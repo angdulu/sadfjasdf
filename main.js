@@ -114,7 +114,7 @@ if (aiRunButton) {
         } catch (error) {
             console.error(error);
             aiStatus.textContent = `Status: Analysis failed (${error.message}).`;
-            aiOutput.value = '분석에 실패했습니다. 서버 환경변수 OPENAI_API_KEY/모델 설정을 확인하세요.';
+            aiOutput.value = `분석 실패: ${error.message}\n\n서버 환경변수 OPENAI_API_KEY/모델 설정을 확인하세요.`;
         } finally {
             aiRunButton.disabled = false;
         }

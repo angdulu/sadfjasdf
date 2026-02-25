@@ -105,10 +105,22 @@ async function handleAnalyze(req, res) {
                 }
             ]
         })
-    }).catch((error) => ({ ok: false, status: 502, json: async () => ({ error: { message: error.message } }) }));
+    }).catch((error) => ({ ok: false, status: 502, text: async () => JSON.stringify({ error: { message: error.message } }) }));
 
-    const responseJson = await upstream.json().catch(() => ({}));
-    sendJson(res, upstream.status || 500, responseJson);
+    const rawText = await upstream.text().catch(() => '');
+    let responseJson = {};
+    try {
+        responseJson = rawText ? JSON.parse(rawText) : {};
+    } catch {
+        responseJson = {};
+    }
+
+    if (!upstream.ok) {
+        const message = responseJson?.error?.message || rawText || `Upstream HTTP ${upstream.status}`;
+        sendJson(res, upstream.status || 500, { error: { message } });
+        return;
+    }
+    sendJson(res, upstream.status || 200, responseJson);
 }
 
 async function serveStatic(req, res) {
@@ -153,5 +165,6 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-    console.log(`Risk Radar server listening on http://localhost:${PORT}`);
+    const keyConfigured = OPENAI_API_KEY ? 'yes' : 'no';
+    console.log(`Risk Radar server listening on http://localhost:${PORT} (OPENAI_API_KEY configured: ${keyConfigured})`);
 });
